@@ -1,8 +1,18 @@
 # Two tier application in Terraform using in folder structure  and wrapper.
 
-On top of the folder structure environment isolation we can also use wrapper which is creating isolated workspaces using Terraform. Most likely the wrapper type of work isolation you will use for pipeline and when you deploy your resources, you will get a drop down list and you can choose which environment you want and correct version of your resources.  Your pipeline will come and get dev.tf or qa.tf files from your tfvars folder,  but before that it has to set the correct backend where we used a placeholder for [env].
+On top of the `Folder Structure` environment isolation we can also use the `wrapper`, which is creating isolated workspaces in Terraform. Most likely the wrapper type of work isolation you will use for pipeline and when we deploy our resources, we will get a drop down list and we can choose, which environment we want and correct version of our resources. Our pipeline will come and get correct values from dev.tf or qa.tf files from your tfvars folder,  but before that it has to set the correct backend where we used a placeholder for [env].
+```
+terraform {
+  backend "s3" {
+  bucket = "terraform-nazy-state"
+  key = "__env__/rds.tfstate"
+  region = "us-east-1"
+  dynamodb_table = "terraform-state-locks"
+  } 
+}
+```
 
-Inside of the wrappers folder we create  rds and webserver (root) module folders and each of them will have tfvars folder  with dev.tf and qa.tf files, values will be same as inside of the root module.
+We also have created RDS and Webserver (root) module folders and each of them will have tfvars folder with dev.tf and qa.tf files, defined variables in (child) module will will be passed inside of the root module, like this.
 
 ```
   env = "dev"
@@ -13,9 +23,12 @@ Inside of the wrappers folder we create  rds and webserver (root) module folders
 
 ```
 
-In the backend file of root rds module we have terraform block where we can’t use the interpolations, it has to be hard coded, to go around it we use place holder like ```[env]```. That allow us to supply different environments using values from dev.tf or qa.tf variables file. If its ```dev``` environment it will provision in ```dev environment``` , if it's ```qa``` environment it will create resources in ```qa environment```.  The next change we will have inside of the main.tf (root module rds) here since we give the values for environments in tfvars folder, we also create variables file where we define our given values in root rds module.
+In the backend file of RDS root module we have terraform block where we can’t use the interpolations, it has to be hard coded, to go around it we use place holder like ```[env]```. That allow us to supply different environments using values from dev.tf or qa.tf variables file. If its ```dev``` environment it will provision in ```dev environment``` , if it's ```qa``` environment it will create resources in ```qa environment```.  Another change we will have inside of the main.tf (root module RDS) here since we give the values for environments in tfvars folder, we also create variables file where we define our given values in root rds module.
 
 ```
+module "rds_module" {
+  source =  "../../modules/rds"
+  
   env = var.env
   storage = 12
   skip_snapshot = var.skip_snapshot
@@ -26,7 +39,7 @@ In the backend file of root rds module we have terraform block where we can’t 
 We also create variables.tf file where we define our given values in root rds module file.
 
 ```
-### Define root module variables
+### Defined variables in root module 
 
 variable "env" {
     description = "the name of the environment"
