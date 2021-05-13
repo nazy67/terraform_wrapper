@@ -1,5 +1,3 @@
-# Define root module variables
-
 variable "env" {
   description = "the name of the environment"
   type        = string
