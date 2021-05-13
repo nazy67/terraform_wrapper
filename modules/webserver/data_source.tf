@@ -16,8 +16,6 @@ data "template_file" "user_data" {
   template = filebase64("${path.module}/template_file/user_data.sh")
   vars = {
     env      = var.env
-    address  = data.terraform_remote_state.rds.outputs.address
-    username = data.terraform_remote_state.rds.outputs.username
   }
 }
 
