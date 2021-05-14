@@ -1,13 +1,13 @@
 module "webserver_module" {
-  source = "../../modules/web_server"
-  
-  env = var.env
-  instance_type = var.instance_type
-  
+  source = "../modules/webserver"
+
+  env           = "dev"
+  instance_type = "t2.micro"
+
   remote_state = {
-      bucket = "terraform-nazy-state"
-      key = "qa/rds.tfstate"   # change to dev 
-      region = "us-east-1"
+    bucket = "terraform-nazy-state"
+    key    = "dev/rds.tfstate" # change to qa 
+    region = "us-east-1"
   }
 }
 
